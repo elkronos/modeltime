@@ -5,7 +5,6 @@ resource_files:
   - articles/logo-modeltime.png
   - articles/forecast_plot.jpg
   - articles/modeltime_workflow.jpg
-  - articles/time_series_course.jpg
 vignette: >
   %\VignetteIndexEntry{Forecasting with Global Models}
   %\VignetteEngine{knitr::rmarkdown}
@@ -36,13 +35,13 @@ knitr::include_graphics("panel_data_success.jpg")
 <br>
 <img src="logo-modeltime.png" width="147" height="170" align="right" />
 
-__Why is global modeling important for time series?__ For starters, the ability to forecast many time series with a single model that is trained on many time series groups was a winning strategy in recent Kaggle M5 Forecasting Competition. In fact, it's the solution we recommend in our [Time Series Course](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/) when forecasting many time series as part of a high-performance forecasting system. Why? Because it speeds up forecasting, allowing the data scientist to more rapidly experiment and find good solutions. 
+__Why is global modeling important for time series?__ For starters, the ability to forecast many time series with a single model that is trained on many time series groups was a winning strategy in recent Kaggle M5 Forecasting Competition. It also speeds up forecasting, allowing the data scientist to more rapidly experiment and find good solutions. 
 
 # Global Forecasting
 
 In general, there are two methods for forecasting at scale (a slow and accurate method and a fast and good method):
 
-1. __Iterative Forecasting (Slow and Accurate):__ Best for accuracy but takes _much longer_ than global model (due to for-loop iteration), results in many models (more memory required), and is often needed to be run in parallel to scale to thousands of time series (otherwise it can take days to complete). But, iterative forecasting can yield great results. See [Nested Forecasting](https://business-science.github.io/modeltime/articles/nested-forecasting.html) for our Iterative Forecasting implementation.
+1. __Iterative Forecasting (Slow and Accurate):__ Best for accuracy but takes _much longer_ than global model (due to for-loop iteration), results in many models (more memory required), and is often needed to be run in parallel to scale to thousands of time series (otherwise it can take days to complete). But, iterative forecasting can yield great results. See [Nested Forecasting](nested-forecasting.html) for our Iterative Forecasting implementation.
 
 2. __Global Modeling (Fast and Good):__ Best for scalability to thousands of time series. Uses a Panel Data structure. Can scale to 10,000+ time series easily because only a single model is made that generates predictions (forecasts) for all of the time series. Requires feature engineering and parameter tuning to get best performance, which can be challenging for beginners.  
 
@@ -77,7 +76,7 @@ knitr::include_graphics("panel_data_xgboost.jpg")
 
 ## Importance of Feature Engineering
 
-The downside is that an global approach can be less accurate. To improve accuracy, __feature engineering and localized model selection__ by time series identifier become critical to large-scale forecasting success. We recommend learning feature engineering techniques that are proven to get results in our [Time Series Forecasting Course](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/). 
+The downside is that an global approach can be less accurate. To improve accuracy, __feature engineering and localized model selection__ by time series identifier become critical to large-scale forecasting success. 
 
 ```{r, echo=F, fig.cap="Modeling Panel Data"}
 knitr::include_graphics("panel_data_success.jpg")
@@ -164,7 +163,7 @@ __Next, we need to preprocess the data.__ This is where we add good features to 
 
 - `step_dummy()`: Used to convert categorical features to binary one-hot encoded features that algorithms like XGBoost can model more effectively.
 
-This results in 37 derived features for modeling. We can certainly include more features such as lags and rolling features that are known to improve results. These concepts and more are covered in the [High-Performance Time Series Course](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/).
+This results in 37 derived features for modeling. We can certainly include more features such as lags and rolling features that are known to improve results.
 
 ```{r}
 rec_obj <- recipe(value ~ ., training(splits)) %>%
@@ -324,44 +323,4 @@ refit_tbl %>%
 
 # Summary
 
-We've now successfully completed a __Global Forecast.__ You may find this challenging, especially if you are not familiar with the Modeltime Workflow, terminology, or tidymodeling in R. If this is the case, we have a solution. Take our high-performance forecasting course. 
-
-
-## Take the High-Performance Forecasting Course
-
-> Become the forecasting expert for your organization
-
-<a href="https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/" target="_blank"><img src="https://www.filepicker.io/api/file/bKyqVAi5Qi64sS05QYLk" alt="High-Performance Time Series Forecasting Course" width="100%" style="box-shadow: 0 0 5px 2px rgba(0, 0, 0, .5);"/></a>
-
-[_High-Performance Time Series Course_](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/)
-
-### Time Series is Changing
-
-Time series is changing. __Businesses now need 10,000+ time series forecasts every day.__ This is what I call a _High-Performance Time Series Forecasting System (HPTSF)_ - Accurate, Robust, and Scalable Forecasting. 
-
- __High-Performance Forecasting Systems will save companies by improving accuracy and scalability.__ Imagine what will happen to your career if you can provide your organization a "High-Performance Time Series Forecasting System" (HPTSF System).
-
-### How to Learn High-Performance Time Series Forecasting
-
-I teach how to build a HPTFS System in my [__High-Performance Time Series Forecasting Course__](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting). You will learn:
-
-- __Time Series Machine Learning__ (cutting-edge) with `Modeltime` - 30+ Models (Prophet, ARIMA, XGBoost, Random Forest, & many more)
-- __Deep Learning__ with `GluonTS` (Competition Winners)
-- __Time Series Preprocessing__, Noise Reduction, & Anomaly Detection
-- __Feature engineering__ using lagged variables & external regressors
-- __Hyperparameter Tuning__
-- __Time series cross-validation__
-- __Ensembling__ Multiple Machine Learning & Univariate Modeling Techniques (Competition Winner)
-- __Scalable Forecasting__ - Forecast 1000+ time series in parallel
-- and more.
-
-<p class="text-center" style="font-size:24px;">
-Become the Time Series Expert for your organization.
-</p>
-<br>
-<p class="text-center" style="font-size:30px;">
-<a href="https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting">Take the High-Performance Time Series Forecasting Course</a>
-</p>
-
-
-
+This article fit a global model across many time series, calibrated and evaluated it by id, then refit it and forecast the future for each series.

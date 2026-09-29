@@ -1,9 +1,7 @@
-url: https://business-science.github.io/modeltime/
+url: https://elkronos.github.io/modeltime/
 template:
   bootstrap: 5
   bootswatch: lux
-  params:
-    ganalytics: G-20GDZ5LL77
 navbar:
   bg: primary
   title: modeltime
@@ -56,8 +54,6 @@ navbar:
   - text: R Ecosystem
     menu:
     - text: Forecast
-    - text: Modeltime (Forecasting)
-      href: https://business-science.github.io/modeltime/
     - text: TimeTK (Time Series Analysis)
       href: https://business-science.github.io/timetk/
     - text: '---'
@@ -72,17 +68,9 @@ navbar:
       href: https://business-science.github.io/modeltime.h2o/
     - text: Modeltime GluonTS (Deep Learning)
       href: https://business-science.github.io/modeltime.gluonts/
-  - text: Python
-    menu:
-    - text: Forecast
-    - text: Timetk for Python (Time Series Analysis)
-      href: https://business-science.github.io/pytimetk/
-  - icon: fas fa-graduation-cap
-    text: Learn
-    href: https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/
   right:
   - icon: fab fa-github
-    href: https://github.com/business-science/modeltime
+    href: https://github.com/elkronos/modeltime
 reference:
 - title: Modeltime Workflow
   desc: The main workflow functions for time series modeling.
@@ -198,7 +186,7 @@ reference:
   contents: starts_with("m750")
 repo:
   url:
-    home: https://github.com/business-science/modeltime
-    source: https://github.com/business-science/modeltime/blob/master/
-    issue: https://github.com/business-science/modeltime/issues/
+    home: https://github.com/elkronos/modeltime
+    source: https://github.com/elkronos/modeltime/blob/master/
+    issue: https://github.com/elkronos/modeltime/issues/
 
