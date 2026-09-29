@@ -533,7 +533,7 @@ ets_predict_impl <- function(object, new_data, ...) {
     preds_forecast <- forecast::forecast(model, h = h_horizon, ...)
 
     # Return predictions as numeric vector
-    preds <- tibble::as_tibble(preds_forecast) %>% purrr::pluck(1)
+    preds <- as.numeric(preds_forecast$mean)
 
     return(preds)
 

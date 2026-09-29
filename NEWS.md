@@ -11,6 +11,12 @@
 - Speed: recursive panel forecasting filters each step's transformed data in one pass instead of splitting by id.
 - Speed: nested fit, refit and forecast collect per-id results in a list and bind them once, instead of growing a table inside the loop.
 - Smaller fitted objects: `naive_reg()`, `window_reg()` and `smooth_es` fits no longer store an unused copy of the training data.
+- `tidymodels`, `gt` and `reactable` move from Imports to Suggests, so installing and loading modeltime pulls in fewer packages. `table_modeltime_accuracy()` asks for `gt` or `reactable` when needed.
+- Parallel processing no longer loads `tidymodels`, `tune` and `dials` on every worker.
+- Import `%||%` from `rlang`. The xgboost model print for `arima_boost()` and `prophet_boost()` used it without an import, which failed on R versions before 4.4.
+- `arima_boost()` and `prophet_boost()` print the xgboost model call on all xgboost versions.
+- `predict()` for recursive models now passes `type` and `opts` through instead of dropping them.
+- ARIMA and ETS predict read the point forecast directly instead of converting the full forecast object to a tibble.
 
 # modeltime 1.3.4
 

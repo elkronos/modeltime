@@ -2,7 +2,7 @@
 # StanHeaders - Used to prevent issues with Prophet dynload error
 
 #' @import StanHeaders
-#' @import tidymodels
+#' @importFrom rlang %||%
 NULL
 
 # ON LOAD ----

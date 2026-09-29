@@ -301,7 +301,7 @@ get_operator <- function(allow_par = TRUE) {
 #'
 #'  - Packages in your namespace are loaded by default
 #'
-#'  - Key Packages are loaded by default: `tidymodels`, `parsnip`, `modeltime`, `dplyr`, `stats`, `lubridate` and `timetk`.
+#'  - Key Packages are loaded by default: `modeltime`, `parsnip`, `workflows`, `dplyr`, `stats`, `lubridate`, `timetk`, `rsample`, `recipes` and `yardstick`.
 #'
 #' @param verbose Logical to control printing.
 #'
@@ -499,8 +499,8 @@ control_modeltime_objects <- function(
 
     if (allow_par) {
         required_pkgs <- c("modeltime", "parsnip", "workflows", "dplyr", "stats",
-                           "lubridate", "tidymodels", "timetk",
-                           "rsample", "recipes", "yardstick", "dials", "tune")
+                           "lubridate", "timetk",
+                           "rsample", "recipes", "yardstick")
 
         namespace_pkgs <- search() %>%
             stringr::str_subset(pattern = "^package") %>%

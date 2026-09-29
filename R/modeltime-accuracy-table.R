@@ -132,6 +132,8 @@ table_modeltime_accuracy <- function(.data, .round_digits = 2,
             group_by_cols <- group_vars_text
         }
 
+        rlang::check_installed("reactable", reason = "to make interactive accuracy tables.")
+
         t <- data_formatted %>%
             reactable::reactable(
                 groupBy         = group_by_cols,
@@ -152,6 +154,8 @@ table_modeltime_accuracy <- function(.data, .round_digits = 2,
 
     } else {
         # gt()
+
+        rlang::check_installed("gt", reason = "to make static accuracy tables.")
 
         t <- data_formatted %>%
             gt::gt(...) %>%

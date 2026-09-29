@@ -51,7 +51,7 @@ Default: \code{1}.}
 during parallel processing.
 \itemize{
 \item Packages in your namespace are loaded by default
-\item Key Packages are loaded by default: \code{tidymodels}, \code{parsnip}, \code{modeltime}, \code{dplyr}, \code{stats}, \code{lubridate} and \code{timetk}.
+\item Key Packages are loaded by default: \code{modeltime}, \code{parsnip}, \code{workflows}, \code{dplyr}, \code{stats}, \code{lubridate}, \code{timetk}, \code{rsample}, \code{recipes} and \code{yardstick}.
 }}
 }
 \value{
