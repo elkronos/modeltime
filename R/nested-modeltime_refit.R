@@ -276,8 +276,8 @@ modeltime_nested_refit_sequential <- function(object, control) {
 
     # SETUP LOGGING ENV ----
     logging_env <- rlang::env(
-        fcast_tbl = tibble::tibble(),
-        error_tbl = tibble::tibble()
+        fcast_tbl = list(),
+        error_tbl = list()
 
     )
 
@@ -333,7 +333,7 @@ modeltime_nested_refit_sequential <- function(object, control) {
                     }
 
 
-                    logging_env$error_tbl <- dplyr::bind_rows(logging_env$error_tbl, error_tbl)
+                    logging_env$error_tbl[[length(logging_env$error_tbl) + 1]] <- error_tbl
 
                     return(res)
                 })
@@ -378,7 +378,7 @@ modeltime_nested_refit_sequential <- function(object, control) {
                             ) %>%
                                 tibble::add_column(!! id_text := id, .before = 1)
 
-                            logging_env$fcast_tbl <- dplyr::bind_rows(logging_env$fcast_tbl, fcast_tbl)
+                            logging_env$fcast_tbl[[length(logging_env$fcast_tbl) + 1]] <- fcast_tbl
 
                         }, error=function(e){
 
@@ -413,8 +413,8 @@ modeltime_nested_refit_sequential <- function(object, control) {
 
     # STRUCTURE ----
 
-    attr(nested_modeltime, "error_tbl")           <- logging_env$error_tbl %>% tidyr::drop_na(.error_desc)
-    attr(nested_modeltime, "future_forecast_tbl") <- logging_env$fcast_tbl
+    attr(nested_modeltime, "error_tbl")           <- dplyr::bind_rows(logging_env$error_tbl) %>% tidyr::drop_na(.error_desc)
+    attr(nested_modeltime, "future_forecast_tbl") <- dplyr::bind_rows(logging_env$fcast_tbl)
     attr(nested_modeltime, "fit_column")          <- ".actual_data"
     attr(nested_modeltime, "time_elapsed")        <- time_elapsed
 

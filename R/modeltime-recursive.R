@@ -704,31 +704,12 @@ panel_tail <- function(data, id, n){
 
         .transform_fun <- function(temp_new_data, slice_idx, id) {
 
-            id_chr <- as.character(id)
-            ..id   <- dplyr::ensym(id_chr)
-
-            # print(.transform(temp_new_data))
-
+            # A single ungrouped filter returns the same rows in the same
+            # (original) order as splitting by id, filtering each group and
+            # re-sorting by row id
             .transform(temp_new_data) %>%
-
-                tibble::rowid_to_column(var = "..row_id") %>%
-
-                dplyr::group_by(!! ..id) %>%
-                dplyr::group_split() %>%
-                purrr::map(function(x){
-
-                    dplyr::filter(x,rowid.. %in% slice_idx)
-
-                    #dplyr::slice_tail(x,n = as.integer(chunk_size))
-
-                    #dplyr::slice_tail(x, n = as.integer(round(new_data_size))) %>%
-                    #    .[slice_idx, ]
-
-                }) %>%
-                dplyr::bind_rows() %>%
-
-                dplyr::arrange(..row_id) %>%
-                dplyr::select(-..row_id)
+                dplyr::ungroup() %>%
+                dplyr::filter(rowid.. %in% slice_idx)
         }
     } else if (inherits(.transform, "recipe")) {
         rlang::abort("Recursive Panel Data cannot use a recipe. Please use a transform function.")

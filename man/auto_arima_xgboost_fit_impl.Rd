@@ -27,7 +27,7 @@ auto_arima_xgboost_fit_impl(
   stepwise = TRUE,
   nmodels = 94,
   trace = FALSE,
-  approximation = (length(x) > 150 | frequency(x) > 12),
+  approximation = NULL,
   method = NULL,
   truncate = NULL,
   test = c("kpss", "adf", "pp"),

@@ -235,20 +235,23 @@ modeltime_refit_parallel <- function(object, data, ..., control) {
         message(stringr::str_glue(" Beginning Parallel Loop | {round(t-t1, 3)} seconds"))
     }
 
+    # Capture dots so they can be exported to workers (`...` can't be used in foreach body)
+    dots <- list(...)
+
+    # Iterate over the models directly so only each model (not the whole
+    # modeltime table) is shipped to the workers
     mod_list <- foreach::foreach(
-            id                  = ret$.model_id,
+            model               = ret$.model,
             .inorder            = TRUE,
             .packages           = control$packages,
             .options.future     = list(seed = TRUE),
             .verbose            = FALSE
         ) %op% {
 
-            model <- ret %>%
-                dplyr::filter(.model_id == id) %>%
-                dplyr::select(.model) %>%
-                dplyr::pull()
-
-            mod <- safe_modeltime_refit(model[[1]], new_data, control = control)
+            mod <- do.call(
+                safe_modeltime_refit,
+                c(list(model, new_data, control = control), dots)
+            )
 
             res <- mod %>%
                 purrr::pluck("result")

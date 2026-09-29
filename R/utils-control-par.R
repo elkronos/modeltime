@@ -477,8 +477,8 @@ control_nested_forecast <- function(verbose = FALSE,
 
 
 #' @export
-print.control_nested_refit <- function(x, ...) {
-    pretty_print_list(x, header = "nested refit control object")
+print.control_nested_forecast <- function(x, ...) {
+    pretty_print_list(x, header = "nested forecast control object")
     invisible(x)
 }
 
