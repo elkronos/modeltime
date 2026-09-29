@@ -1031,7 +1031,8 @@ mdl_time_forecast.workflow <- function(object, calibration_data, new_data = NULL
     }
 
     # Issue - hardhat::forge defaults to outcomes = FALSE, which creates an error at predict.workflow()
-    forged    <- hardhat::forge(new_data, mld$blueprint, outcomes = TRUE)
+    # Reuse the forge above (same data, blueprint and outcomes = TRUE)
+    forged    <- new_data_forged
     new_data  <- forged$predictors
     fit       <- object$fit$fit
 

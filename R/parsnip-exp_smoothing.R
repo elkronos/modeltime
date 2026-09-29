@@ -666,8 +666,7 @@ smooth_fit_impl <- function(x, y, period = "auto",
         ),
 
         # Preprocessing Recipe (prepped) - Used in predict method
-        extras = list(xreg_matrix = xreg_matrix,
-                      xreg_recipe = xreg_recipe),
+        extras = list(xreg_recipe = xreg_recipe),
 
         # Description
         desc = fit_ets$model
@@ -701,7 +700,7 @@ smooth_predict_impl <- function(object, new_data, ...) {
     model       <- object$models$model_1
     idx_train   <- object$data %>% timetk::tk_index()
     h_horizon   <- nrow(new_data)
-    xreg_recipe <- object$models$extras$xreg_recipe
+    xreg_recipe <- object$extras$xreg_recipe
 
     #PREDICTIONS
 

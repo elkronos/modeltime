@@ -150,7 +150,7 @@ modeltime_nested_forecast_sequential <- function(object, h, include_actual, conf
     # SETUP PROGRESS
 
     logging_env <- rlang::env(
-        error_tbl = tibble::tibble()
+        error_tbl = list()
     )
 
     if (!control$verbose) cli::cli_progress_bar("Forecast predictions...", total = nrow(object), .envir = logging_env)
@@ -194,7 +194,7 @@ modeltime_nested_forecast_sequential <- function(object, h, include_actual, conf
                                 .error_desc = ifelse(is.null(err), NA_character_, err)
                             )
 
-                            logging_env$error_tbl <- dplyr::bind_rows(logging_env$error_tbl, error_tbl)
+                            logging_env$error_tbl[[length(logging_env$error_tbl) + 1]] <- error_tbl
                         })
 
 
@@ -240,7 +240,7 @@ modeltime_nested_forecast_sequential <- function(object, h, include_actual, conf
 
     # STRUCTURE ----
 
-    error_tbl <- logging_env$error_tbl
+    error_tbl <- dplyr::bind_rows(logging_env$error_tbl)
     if (nrow(error_tbl) > 1) {
         error_tbl <- error_tbl %>%
             tidyr::drop_na(.error_desc)
@@ -294,7 +294,8 @@ modeltime_nested_forecast_parallel <- function(object, h, include_actual, conf_i
 
     splits_list = object$.splits
 
-    actual_list = object$.actual_data
+    # Avoid shipping actual data to workers when it will be discarded
+    actual_list = if (include_actual) object$.actual_data else vector("list", nrow(object))
 
     id_vec      = object[[id_text]]
 
@@ -339,13 +340,17 @@ modeltime_nested_forecast_parallel <- function(object, h, include_actual, conf_i
 
                 }, error=function(e){
 
-                    err <- utils::capture.output(e)
+                    err <<- paste(utils::capture.output(e), collapse = " ")
 
                 })
             })
         })
 
-        if(is.null(fcast_tbl)) err <- "Forecast Failed" else err <- NA_character_
+        if (!is.null(fcast_tbl)) {
+            err <- NA_character_
+        } else if (is.null(err)) {
+            err <- "Forecast Failed"
+        }
 
         error_tbl <- tibble::tibble(
             !! id_text := id,

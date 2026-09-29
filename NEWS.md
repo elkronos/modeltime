@@ -1,6 +1,16 @@
 # modeltime 1.3.5
 
 - Fix `arima_boost()` example failure on R-devel by adding a default for `include.constant` in the ARIMA-XGBoost bridge.
+- `exp_smoothing()` with the `smooth_es` engine now uses external regressors at predict time. Previously the stored xreg recipe was looked up in the wrong place, so forecasts ignored `new_data` regressors.
+- `arima_boost()` with the `arima_xgboost` engine now respects a user supplied `lambda`.
+- `arima_boost()` with the `auto_arima_xgboost` engine now sets the default `approximation` from the outcome series, matching `forecast::auto.arima()`. Previously it was always `FALSE`.
+- `modeltime_refit()` in parallel mode now passes `...` (for example `resamples`) through to each model, and sends each worker only the model it refits instead of the whole modeltime table.
+- `modeltime_nested_forecast()` in parallel mode now records the actual error message for failed forecasts, and no longer sends actual data to workers when `include_actual = FALSE`.
+- Add a print method for `control_nested_forecast()`. The previous definition overwrote the `control_nested_refit()` print method.
+- Speed: `modeltime_forecast()` no longer forges `new_data` twice for workflows.
+- Speed: recursive panel forecasting filters each step's transformed data in one pass instead of splitting by id.
+- Speed: nested fit, refit and forecast collect per-id results in a list and bind them once, instead of growing a table inside the loop.
+- Smaller fitted objects: `naive_reg()`, `window_reg()` and `smooth_es` fits no longer store an unused copy of the training data.
 
 # modeltime 1.3.4
 

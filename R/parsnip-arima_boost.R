@@ -430,7 +430,7 @@ auto_arima_xgboost_fit_impl <- function(x, y, period = "auto",
                                         stepwise = TRUE,
                                         nmodels = 94,
                                         trace = FALSE,
-                                        approximation = (length(x) > 150 | frequency(x) > 12),
+                                        approximation = NULL,
                                         method = NULL,
                                         truncate = NULL,
                                         test = c("kpss", "adf", "pp"),
@@ -479,6 +479,12 @@ auto_arima_xgboost_fit_impl <- function(x, y, period = "auto",
 
     # FIT
     outcome <- stats::ts(outcome, frequency = period)
+
+    # Default matches forecast::auto.arima(), evaluated on the outcome series
+    # (not the predictor data frame `x`)
+    if (is.null(approximation)) {
+        approximation <- (length(outcome) > 150 | stats::frequency(outcome) > 12)
+    }
 
     # auto.arima
     fit_arima   <- forecast::auto.arima(outcome,
@@ -671,7 +677,7 @@ arima_xgboost_fit_impl <- function(x, y, period = "auto",
         seasonal = c(P, D, Q),
         include.mean = include.mean,
         include.drift = include.drift,
-        lambda = model$lambda,
+        lambda = lambda,
         biasadj = biasadj,
         method = method,
         model = model

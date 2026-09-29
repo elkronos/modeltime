@@ -302,7 +302,6 @@ naive_fit_impl <- function(x, y, id = NULL, seasonal_period = "auto", ...) {
         id                = id,
         idx_column        = idx_col,
         value_column      = "value",
-        constructed_tbl   = constructed_tbl,
         is_grouped        = is_grouped
     )
 
@@ -444,7 +443,6 @@ snaive_fit_impl <- function(x, y, id = NULL, seasonal_period = "auto", ...) {
         id                = id,
         idx_column        = idx_col,
         value_column      = "value",
-        constructed_tbl   = constructed_tbl,
         is_grouped        = is_grouped,
         period            = period
     )

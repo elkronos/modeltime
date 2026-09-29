@@ -378,9 +378,9 @@ modeltime_nested_fit_sequential <- function(nested_data, ...,
 
     # SETUP LOGGING ENV ----
     logging_env <- rlang::env(
-        acc_tbl   = tibble::tibble(),
-        fcast_tbl = tibble::tibble(),
-        error_tbl = tibble::tibble()
+        acc_tbl   = list(),
+        fcast_tbl = list(),
+        error_tbl = list()
 
     )
 
@@ -430,7 +430,7 @@ modeltime_nested_fit_sequential <- function(nested_data, ...,
                         }
 
 
-                        logging_env$error_tbl <- dplyr::bind_rows(logging_env$error_tbl, error_tbl)
+                        logging_env$error_tbl[[length(logging_env$error_tbl) + 1]] <- error_tbl
 
                         return(res)
                     })
@@ -482,7 +482,7 @@ modeltime_nested_fit_sequential <- function(nested_data, ...,
                                     tibble::add_column(!! id_text := id, .before = 1)
                             })
 
-                            logging_env$acc_tbl <- dplyr::bind_rows(logging_env$acc_tbl, acc_tbl)
+                            logging_env$acc_tbl[[length(logging_env$acc_tbl) + 1]] <- acc_tbl
 
                         }, error=function(e) {
 
@@ -494,7 +494,7 @@ modeltime_nested_fit_sequential <- function(nested_data, ...,
                                 .model_desc = "NULL"
                             )
 
-                            logging_env$acc_tbl <- dplyr::bind_rows(logging_env$acc_tbl, acc_tbl)
+                            logging_env$acc_tbl[[length(logging_env$acc_tbl) + 1]] <- acc_tbl
 
 
                         })
@@ -517,7 +517,7 @@ modeltime_nested_fit_sequential <- function(nested_data, ...,
                             ) %>%
                                 tibble::add_column(!! id_text := id, .before = 1)
 
-                            logging_env$fcast_tbl <- dplyr::bind_rows(logging_env$fcast_tbl, fcast_tbl)
+                            logging_env$fcast_tbl[[length(logging_env$fcast_tbl) + 1]] <- fcast_tbl
 
                         }, error=function(e){
 
@@ -555,7 +555,7 @@ modeltime_nested_fit_sequential <- function(nested_data, ...,
 
     class(nested_modeltime) <- c("nested_mdl_time", class(nested_modeltime))
 
-    error_tbl <- logging_env$error_tbl
+    error_tbl <- dplyr::bind_rows(logging_env$error_tbl)
     if (nrow(error_tbl) > 0) {
         error_tbl <- error_tbl %>%
             tidyr::drop_na(.error_desc)
@@ -567,8 +567,8 @@ modeltime_nested_fit_sequential <- function(nested_data, ...,
     attr(nested_modeltime, "conf_method")         <- conf_method
     attr(nested_modeltime, "metric_set")          <- metric_set
     attr(nested_modeltime, "error_tbl")           <- error_tbl
-    attr(nested_modeltime, "accuracy_tbl")        <- logging_env$acc_tbl
-    attr(nested_modeltime, "test_forecast_tbl")   <- logging_env$fcast_tbl
+    attr(nested_modeltime, "accuracy_tbl")        <- dplyr::bind_rows(logging_env$acc_tbl)
+    attr(nested_modeltime, "test_forecast_tbl")   <- dplyr::bind_rows(logging_env$fcast_tbl)
     attr(nested_modeltime, "best_selection_tbl")  <- NULL
     attr(nested_modeltime, "future_forecast_tbl") <- NULL
     attr(nested_modeltime, "fit_column")          <- ".splits"
