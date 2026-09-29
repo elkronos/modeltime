@@ -919,13 +919,7 @@ mdl_time_forecast.workflow <- function(object, calibration_data, new_data = NULL
     # WORKFLOW MOLD
 
     # Contains $predictors, $outcomes, $blueprint
-    # mld <- object %>% workflows::extract_mold()
-
-    # UPGRADE MOLD (TEMP FIX) ----
-    # - models built with hardhat <1.0.0 have issue
-    #   https://github.com/tidymodels/hardhat/issues/200
-    preprocessor <- workflows::extract_preprocessor(object)
-    mld          <- hardhat::mold(preprocessor, preprocessor$template)
+    mld <- get_workflow_mold(object)
 
     # NEW DATA
 
@@ -1214,4 +1208,36 @@ detect_net <- function(object){
         res <- FALSE
     }
     return(res)
+}
+
+# WORKFLOW MOLD HELPER ----
+
+# Returns the mold stored in a trained workflow. This is the blueprint the
+# model was trained with, so it does not need to re-prep the recipe.
+# Falls back to re-molding on the preprocessor template when the stored
+# blueprint cannot forge, e.g. for workflows built with hardhat < 1.0.0
+# (https://github.com/tidymodels/hardhat/issues/200).
+get_workflow_mold <- function(object) {
+
+    mld <- tryCatch({
+        mld <- workflows::extract_mold(object)
+        bp  <- mld$blueprint
+
+        # Zero-row probe: cheap check that the stored blueprint can forge
+        probe <- dplyr::bind_cols(
+            bp$ptypes$predictors,
+            bp$ptypes$outcomes,
+            !!! unname(bp$extra_role_ptypes)
+        )
+        hardhat::forge(probe, bp, outcomes = TRUE)
+
+        mld
+    }, error = function(e) NULL)
+
+    if (is.null(mld)) {
+        preprocessor <- workflows::extract_preprocessor(object)
+        mld          <- hardhat::mold(preprocessor, preprocessor$template)
+    }
+
+    mld
 }
