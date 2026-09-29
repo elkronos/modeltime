@@ -708,6 +708,15 @@ smooth_predict_impl <- function(object, new_data, ...) {
         preds <- as.numeric(greybox::forecast(model, h = h_horizon, ...)$mean)
     } else {
         xreg_matrix <- bake_xreg_recipe(xreg_recipe, new_data, format = "matrix")
+
+        # smooth::es() names a single xreg column after the subsetting
+        # expression it uses internally, so its name no longer matches the
+        # recipe output. Match columns to the model's regressors by position.
+        xreg_names <- setdiff(all.vars(stats::formula(model))[-1], "trend")
+        if (length(xreg_names) == ncol(xreg_matrix) && !all(xreg_names %in% colnames(xreg_matrix))) {
+            colnames(xreg_matrix) <- xreg_names
+        }
+
         preds <- as.numeric(greybox::forecast(model, h = h_horizon, newdata = xreg_matrix, ...)$mean)
     }
 
