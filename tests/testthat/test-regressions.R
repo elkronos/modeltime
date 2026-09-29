@@ -89,3 +89,53 @@ test_that("control_nested_forecast has its own print method", {
     expect_output(print(control_nested_refit()), "nested refit control object")
 
 })
+
+
+# RECURSIVE PANEL ----
+
+test_that("recursive panel forecasts do not depend on the row order of new_data", {
+
+    skip_on_cran()
+
+    lag_transformer_grouped <- function(data) {
+        data %>%
+            dplyr::group_by(id) %>%
+            timetk::tk_augment_lags(value, .lags = c(3, 6, 9, 12)) %>%
+            dplyr::ungroup()
+    }
+
+    m4_lags <- timetk::m4_monthly %>%
+        dplyr::mutate(id = as.character(id)) %>%
+        dplyr::group_by(id) %>%
+        timetk::future_frame(.length_out = 12, .bind_data = TRUE) %>%
+        dplyr::ungroup() %>%
+        lag_transformer_grouped()
+
+    train_data  <- tidyr::drop_na(m4_lags)
+    future_data <- m4_lags %>% dplyr::filter(is.na(value))
+
+    model_fit <- parsnip::linear_reg() %>%
+        parsnip::set_engine("lm") %>%
+        parsnip::fit(value ~ ., data = train_data) %>%
+        recursive(
+            id         = "id",
+            transform  = lag_transformer_grouped,
+            train_tail = panel_tail(train_data, id, 12),
+            chunk_size = 3
+        )
+
+    by_id   <- future_data %>% dplyr::arrange(id, date)
+    by_date <- future_data %>% dplyr::arrange(date, dplyr::desc(id))
+
+    preds_by_id <- by_id %>%
+        dplyr::mutate(.pred = predict(model_fit, new_data = by_id)$.pred) %>%
+        dplyr::select(id, date, .pred)
+
+    preds_by_date <- by_date %>%
+        dplyr::mutate(.pred = predict(model_fit, new_data = by_date)$.pred) %>%
+        dplyr::select(id, date, .pred) %>%
+        dplyr::arrange(id, date)
+
+    expect_equal(preds_by_date, preds_by_id)
+
+})

@@ -433,9 +433,7 @@ predict_recursive_workflow <- function(object, new_data, type = NULL, opts = lis
         rlang::abort("Workflow has not yet been trained. Do you need to call `fit()`?")
     }
 
-    # blueprint <- workflow$pre$mold$blueprint
-    preprocessor <- workflows::extract_preprocessor(workflow)
-    mld          <- hardhat::mold(preprocessor, preprocessor$template)
+    mld          <- get_workflow_mold(workflow)
     forged       <- hardhat::forge(new_data, mld$blueprint)
     new_data     <- forged$predictors
 
@@ -479,35 +477,42 @@ predict_recursive_panel_model_fit <- function(object, new_data, type = NULL, opt
     idx_sets <- split(x = seq_len(group_size),
                       f = (seq_len(group_size) - 1) %/% chunk_size)
 
-    # #  Comment this out ----
-    # print("here")
-    # obj <<- object
-    # print({
-    #     list(
-    #         object,
-    #         y_var,
-    #         class(object),
-    #         new_data,
-    #         train_tail
-    #     )
-    # })
-
     # LOOP LOGIC ----
-    .preds <- tibble::tibble(.id = new_data %>% dplyr::select(!! .id) %>% purrr::as_vector(),
-                             .pred = numeric(nrow(new_data))) %>%
-        dplyr::group_by(.id) %>%
-        dplyr::mutate(rowid.. = dplyr::row_number()) %>%
-        dplyr::ungroup()
-
     new_data <- new_data %>%
         dplyr::group_by(!! .id) %>%
         dplyr::mutate(rowid.. = dplyr::row_number()) %>%
         dplyr::ungroup()
 
+    # Row lookup: position in new_data of the k-th row of each id. Predictions
+    # are matched back by (id, rowid..) so they land on the right rows no
+    # matter how new_data is ordered.
+    new_ids    <- as.character(new_data[[id]])
+    grp_rows   <- split(seq_len(nrow(new_data)), factor(new_ids, levels = unique(new_ids)))
+    flat_rows  <- unlist(grp_rows, use.names = FALSE)
+    grp_offset <- stats::setNames(c(0L, cumsum(lengths(grp_rows)))[seq_along(grp_rows)], names(grp_rows))
+
+    row_lookup <- function(data) {
+        flat_rows[grp_offset[as.character(data[[id]])] + data$rowid..]
+    }
+
+    pred_values <- function(new_data) {
+        ret <- pred_fun(object, new_data = new_data, type = type, opts = opts, ...)
+        if (is.data.frame(ret)) ret <- ret[[1]]
+        ret
+    }
+
+    .preds <- numeric(nrow(new_data))
+
+    if (!y_var %in% names(new_data)) {
+        new_data[[y_var]] <- NA_real_
+    }
+
     .first_slice <- new_data %>%
         dplyr::group_by(!! .id) %>%
         dplyr::slice_head(n = chunk_size) %>%
         dplyr::ungroup()
+
+    target_rows <- row_lookup(.first_slice)
 
     # Fix - When ID is dummied
     if (!is.null(object$spec$remove_id)) {
@@ -521,23 +526,19 @@ predict_recursive_panel_model_fit <- function(object, new_data, type = NULL, opt
         .first_slice <- .first_slice %>% dplyr::select(-rowid..)
     }
 
-    .preds[.preds$rowid.. %in% idx_sets[[1]], 2] <- new_data[new_data$rowid.. %in% idx_sets[[1]], y_var] <- pred_fun(object,
-                                                                                         new_data = .first_slice,
-                                                                                         type = type,
-                                                                                         opts = opts,
-                                                                                         ...)
-
-    .groups <- new_data %>%
-        dplyr::group_by(!! .id) %>%
-        dplyr::count(!! .id) %>%
-        dim() %>%
-        .[1]
-
-    new_data_size <- nrow(.preds)/.groups
+    preds_i <- pred_values(.first_slice)
+    .preds[target_rows] <- preds_i
+    new_data[[y_var]][target_rows] <- preds_i
 
     .temp_new_data <- dplyr::bind_rows(train_tail, new_data)
+    n_tail_rows    <- nrow(train_tail)
+    y_temp         <- .temp_new_data[[y_var]]
 
     n_train_tail <- max(table(train_tail[[id]]))
+
+    # Row positions of each id in .temp_new_data (train tail first, then new
+    # data), computed once instead of regrouping on every step
+    temp_grp_rows <- split(seq_len(nrow(.temp_new_data)), .temp_new_data[[id]])
 
     if (length(idx_sets) > 1){
         for (i in 2:length(idx_sets)) {
@@ -545,10 +546,18 @@ predict_recursive_panel_model_fit <- function(object, new_data, type = NULL, opt
             transform_window_start <- min(idx_sets[[i]])
             transform_window_end   <- max(idx_sets[[i]]) + n_train_tail
 
-            .nth_slice <- .transform(.temp_new_data %>%
-                                         dplyr::group_by(!! .id) %>%
-                                         dplyr::slice(transform_window_start:transform_window_end),
+            window_rows <- unlist(lapply(temp_grp_rows, function(r) {
+                if (transform_window_start > length(r)) return(integer(0))
+                r[transform_window_start:min(transform_window_end, length(r))]
+            }), use.names = FALSE)
+
+            .temp_new_data[[y_var]] <- y_temp
+
+            .nth_slice <- .transform(.temp_new_data[window_rows, ] %>%
+                                         dplyr::group_by(!! .id),
                                      idx_sets[[i]], id)
+
+            target_rows <- row_lookup(.nth_slice)
 
             # Fix - When ID is dummied
             if (!is.null(object$spec$remove_id)) {
@@ -564,16 +573,13 @@ predict_recursive_panel_model_fit <- function(object, new_data, type = NULL, opt
 
             .nth_slice <- .nth_slice[names(.first_slice)]
 
-
-            .preds[.preds$rowid.. %in% idx_sets[[i]], 2] <- .temp_new_data[.temp_new_data$rowid.. %in% idx_sets[[i]], y_var] <- pred_fun(object,
-                                                                                                                                         new_data = .nth_slice,
-                                                                                                                                         type = type,
-                                                                                                                                         opts = opts,
-                                                                                                                                         ...)
+            preds_i <- pred_values(.nth_slice)
+            .preds[target_rows] <- preds_i
+            y_temp[n_tail_rows + target_rows] <- preds_i
         }
     }
 
-    return(.preds[,2])
+    return(tibble::tibble(.pred = .preds))
 
 }
 
@@ -588,8 +594,7 @@ predict_recursive_panel_workflow <- function(object, new_data, type = NULL, opts
         rlang::abort("Workflow has not yet been trained. Do you need to call `fit()`?")
     }
 
-    preprocessor <- workflows::extract_preprocessor(workflow)
-    mld          <- hardhat::mold(preprocessor, preprocessor$template)
+    mld          <- get_workflow_mold(workflow)
     forged       <- hardhat::forge(new_data, mld$blueprint)
     new_data     <- forged$predictors
 

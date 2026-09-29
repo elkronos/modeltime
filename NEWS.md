@@ -1,5 +1,8 @@
 # modeltime 1.3.5
 
+- Recursive panel forecasts now match each prediction to its own id and step. Previously, predictions were written back in grouped (sorted id) order, so they landed on the wrong rows when `new_data` was not sorted by id, or was sorted by date with `chunk_size` above 1.
+- Speed: the recursive panel loop computes each id's row positions once instead of regrouping the data on every step.
+- Speed: workflow forecasts use the mold stored in the fitted workflow instead of re-prepping the recipe on every `modeltime_forecast()` and `modeltime_calibrate()` call. It falls back to the old behavior if the stored blueprint cannot be used (for example, workflows fit with hardhat < 1.0.0). This also uses the preprocessing the model was actually trained with when a recipe was defined on different data than it was fit on.
 - Fix `arima_boost()` example failure on R-devel by adding a default for `include.constant` in the ARIMA-XGBoost bridge.
 - `exp_smoothing()` with the `smooth_es` engine now uses external regressors at predict time. Previously the stored xreg recipe was looked up in the wrong place, so forecasts ignored `new_data` regressors.
 - `arima_boost()` with the `arima_xgboost` engine now respects a user supplied `lambda`.
