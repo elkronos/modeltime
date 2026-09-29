@@ -577,7 +577,8 @@ print.auto_arima_xgboost_fit_impl <- function(x, ...) {
     print(x$models$model_1)
     cat("\n---\n")
     cat("Model 2: XGBoost Errors\n\n")
-    print(x$models$model_2$call)
+    # to work for all xgboost versions
+    print(x$models$model_2$call %||% attr(x$models$model_2, "call"))
     invisible(x)
 }
 
@@ -804,10 +805,7 @@ arima_xgboost_predict_impl <- function(object, new_data, ...) {
     # PREDICTIONS
 
     # arima
-    preds_arima <- forecast::forecast(arima_model, h = h_horizon) %>%
-        tibble::as_tibble() %>%
-        purrr::pluck(1) %>%
-        as.numeric()
+    preds_arima <- as.numeric(forecast::forecast(arima_model, h = h_horizon)$mean)
 
     # xgboost
     if (!is.null(xreg_tbl)) {

@@ -326,12 +326,12 @@ predict.recursive <- function(object, new_data, type = NULL, opts = list(), ...)
 
     if (inherits(object, "model_fit")) {
         # print("Recursive Model fit")
-        ret <- predict_recursive_model_fit(object, new_data, type = NULL, opts = list(), ...)
+        ret <- predict_recursive_model_fit(object, new_data, type = type, opts = opts, ...)
     }
 
     if (inherits(object, "workflow")) {
         # print("Recursive Workflow")
-        ret <- predict_recursive_workflow(object, new_data, type = NULL, opts = list(), ...)
+        ret <- predict_recursive_workflow(object, new_data, type = type, opts = opts, ...)
     }
 
     return(ret)
@@ -344,12 +344,12 @@ predict.recursive_panel <- function(object, new_data, type = NULL, opts = list()
 
     if (inherits(object, "model_fit")) {
         # print("Recursive Model fit")
-        ret <- predict_recursive_panel_model_fit(object, new_data, type = NULL, opts = list(), ...)
+        ret <- predict_recursive_panel_model_fit(object, new_data, type = type, opts = opts, ...)
     }
 
     if (inherits(object, "workflow")) {
         # print("Recursive Workflow")
-        ret <- predict_recursive_panel_workflow(object, new_data, type = NULL, opts = list(), ...)
+        ret <- predict_recursive_panel_workflow(object, new_data, type = type, opts = opts, ...)
     }
 
     return(ret)

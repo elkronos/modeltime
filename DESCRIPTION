@@ -27,11 +27,9 @@ Imports:
     yardstick (>= 0.0.8),
     workflows (>= 1.0.0),
     hardhat (>= 1.0.0),
-    rlang (>= 0.1.2),
+    rlang (>= 1.0.0),
     glue,
     plotly,
-    reactable,
-    gt,
     ggplot2,
     tibble,
     tidyr,
@@ -50,9 +48,11 @@ Imports:
     xgboost (>= 1.2.0.1),
     prophet,
     methods,
-    cli,
-    tidymodels
+    cli
 Suggests:
+    tidymodels,
+    gt,
+    reactable,
     rstan,
     slider, 
     sparklyr,
