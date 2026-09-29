@@ -5,7 +5,6 @@ resource_files:
   - articles/logo-modeltime.png
   - articles/forecast_plot.jpg
   - articles/modeltime_workflow.jpg
-  - articles/time_series_course.jpg
 vignette: >
   %\VignetteIndexEntry{Getting Started with Modeltime}
   %\VignetteEngine{knitr::rmarkdown}
@@ -40,19 +39,7 @@ Forecasting with `tidymodels` made easy! This short tutorial shows how you can u
 - __Modeltime models__ like `arima_reg()`, `arima_boost()`, `exp_smoothing()`, `prophet_reg()`, `prophet_boost()`, and more
 - __Parsnip models__ like `linear_reg()`, `mars()`, `svm_rbf()`, `rand_forest()`, `boost_tree()` and more
 
-...to perform classical time series analysis and machine learning ___in one framework!___  See [_"Model List"_](https://business-science.github.io/modeltime/articles/modeltime-model-list.html) for the full list of `modeltime` models. 
-
-## Quickstart Video
-
-For those that prefer video tutorials, we have an [11-minute YouTube Video](https://www.youtube.com/watch?v=-bCelif-ENY) that walks you through the Modeltime Workflow. 
-
-<a href="https://www.youtube.com/watch?v=-bCelif-ENY" target="_blank">
-<p style='text-align:center;'>
-<img src= "modeltime-video.jpg"
-alt="Introduction to Modeltime" width="60%"/>
-</p>
-<p style='text-align:center'>(Click to Watch on YouTube)</p>
-</a>
+...to perform classical time series analysis and machine learning ___in one framework!___  See [_"Model List"_](modeltime-model-list.html) for the full list of `modeltime` models. 
 
 
 ## The Modeltime Workflow
@@ -371,51 +358,6 @@ More often than not refitting is a good idea. Refitting:
 
 ## Summary
 
-We just showcased the Modeltime Workflow. But this is a simple problem. And, there's a lot more to learning time series. 
+This walkthrough covered the Modeltime workflow: split the data, fit several models, add them to a Modeltime Table, calibrate on a test set, evaluate the test forecast and accuracy, then refit on the full data and forecast forward.
 
-- Many more algorithms
-- Ensembling
-- Machine Learning
-- Deep Learning
-- Scalable Modeling: 10,000+ time series
-
-Your probably thinking how am I ever going to learn time series forecasting. Here's the solution that will save you years of struggling. 
-
-## Take the High-Performance Forecasting Course
-
-> Become the forecasting expert for your organization
-
-<a href="https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/" target="_blank"><img src="time_series_machine_learning.jpg" alt="High-Performance Time Series Forecasting Course" width="100%" style="box-shadow: 0 0 5px 2px rgba(0, 0, 0, .5);"/></a>
-
-[_High-Performance Time Series Course_](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/)
-
-### Time Series is Changing
-
-Time series is changing. __Businesses now need 10,000+ time series forecasts every day.__ This is what I call a _High-Performance Time Series Forecasting System (HPTSF)_ - Accurate, Robust, and Scalable Forecasting. 
-
- __High-Performance Forecasting Systems will save companies by improving accuracy and scalability.__ Imagine what will happen to your career if you can provide your organization a "High-Performance Time Series Forecasting System" (HPTSF System).
-
-### How to Learn High-Performance Time Series Forecasting
-
-I teach how to build a HPTFS System in my [__High-Performance Time Series Forecasting Course__](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting). You will learn:
-
-- __Time Series Machine Learning__ (cutting-edge) with `Modeltime` - 30+ Models (Prophet, ARIMA, XGBoost, Random Forest, & many more)
-- __Deep Learning__ with `GluonTS` (Competition Winners)
-- __Time Series Preprocessing__, Noise Reduction, & Anomaly Detection
-- __Feature engineering__ using lagged variables & external regressors
-- __Hyperparameter Tuning__
-- __Time series cross-validation__
-- __Ensembling__ Multiple Machine Learning & Univariate Modeling Techniques (Competition Winner)
-- __Scalable Forecasting__ - Forecast 1000+ time series in parallel
-- and more.
-
-<p class="text-center" style="font-size:24px;">
-Become the Time Series Expert for your organization.
-</p>
-<br>
-<p class="text-center" style="font-size:30px;">
-<a href="https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting">Take the High-Performance Time Series Forecasting Course</a>
-</p>
-
-
-
+For more, see the articles on global (panel) models, nested forecasting, recursive forecasting, conformal prediction intervals and parallel processing.

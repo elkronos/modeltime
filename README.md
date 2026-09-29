@@ -1,198 +1,112 @@
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # modeltime
 
-<!-- badges: start -->
+Time series forecasting for R, built on [tidymodels](https://www.tidymodels.org/).
 
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/modeltime)](https://cran.r-project.org/package=modeltime)
-![](http://cranlogs.r-pkg.org/badges/modeltime?color=brightgreen)
-![](http://cranlogs.r-pkg.org/badges/grand-total/modeltime?color=brightgreen)
-[![Codecov test
-coverage](https://codecov.io/gh/business-science/modeltime/branch/master/graph/badge.svg)](https://app.codecov.io/gh/business-science/modeltime?branch=master)
-[![R-CMD-check](https://github.com/business-science/modeltime/workflows/R-CMD-check/badge.svg)](https://github.com/business-science/modeltime/actions)
-<!-- badges: end -->
-
-> Tidy time series forecasting in `R`.
-
-Mission: Our number 1 goal is to make high-performance time series
-analysis easier, faster, and more scalable. Modeltime solves this with a
-simple to use infrastructure for modeling and forecasting time series.
-
-## Quickstart Video
-
-For those that prefer video tutorials, we have an [11-minute YouTube
-Video](https://www.youtube.com/watch?v=-bCelif-ENY) that walks you
-through the Modeltime Workflow.
-
-<a href="https://www.youtube.com/watch?v=-bCelif-ENY" target="_blank">
-<p style="text-align:center;">
-<img src= "vignettes/modeltime-video.jpg"
-alt="Introduction to Modeltime" width="60%"/>
-</p>
-<p style="text-align:center">
-(Click to Watch on YouTube)
-</p>
-
-</a>
-
-## Tutorials
-
-- [**Getting Started with
-  Modeltime**](https://business-science.github.io/modeltime/articles/getting-started-with-modeltime.html):
-  A walkthrough of the 6-Step Process for using `modeltime` to forecast
-
-- [**Modeltime
-  Documentation**](https://business-science.github.io/modeltime/): Learn
-  how to **use** `modeltime`, **find** *Modeltime Models*, and
-  **extend** `modeltime` so you can use new algorithms inside the
-  *Modeltime Workflow*.
+`modeltime` puts classical time series models (ARIMA, exponential smoothing, Prophet and others) and machine learning models from `parsnip` into one workflow. You fit them the same way, compare them on the same test set, and forecast with all of them at once.
 
 ## Installation
 
-CRAN version:
+Install this version from GitHub:
 
 ``` r
-install.packages("modeltime", dependencies = TRUE)
+remotes::install_github("elkronos/modeltime")
 ```
 
-Development version:
+`install.packages("modeltime")` installs the CRAN release, which does not include the changes in this repository. See [NEWS.md](NEWS.md) for what has changed.
+
+## Models
+
+Time series models included in `modeltime`:
+
+| Function | Engines |
+|---|---|
+| `arima_reg()` | `auto_arima`, `arima` |
+| `arima_boost()` | `auto_arima_xgboost`, `arima_xgboost` |
+| `exp_smoothing()` | `ets`, `croston`, `theta`, `smooth_es` |
+| `prophet_reg()` | `prophet` |
+| `prophet_boost()` | `prophet_xgboost` |
+| `seasonal_reg()` | `tbats`, `stlm_ets`, `stlm_arima` |
+| `nnetar_reg()` | `nnetar` |
+| `adam_reg()` | `adam`, `auto_adam` |
+| `temporal_hierarchy()` | `thief` |
+| `naive_reg()` | `naive`, `snaive` |
+| `window_reg()` | `window_function` |
+
+Any `parsnip` regression model (for example `linear_reg()`, `rand_forest()`, `boost_tree()`, `mars()`) can also be used, on its own or inside a `workflow()`. `recursive()` turns a model with lagged features into an autoregressive forecaster.
+
+## Workflow
+
+1. Split the data into training and test sets.
+2. Fit one or more models on the training set.
+3. Add the fitted models to a table with `modeltime_table()`.
+4. Calibrate on the test set with `modeltime_calibrate()`.
+5. Check test accuracy and forecasts with `modeltime_accuracy()` and `modeltime_forecast()`.
+6. Refit on all the data with `modeltime_refit()` and forecast the future.
 
 ``` r
-remotes::install_github("business-science/modeltime", dependencies = TRUE)
+library(modeltime)
+library(parsnip)
+library(rsample)
+library(timetk)
+library(dplyr)
+
+data <- m4_monthly %>% filter(id == "M750")
+
+splits <- initial_time_split(data, prop = 0.9)
+
+model_arima <- arima_reg() %>%
+    set_engine("auto_arima") %>%
+    fit(value ~ date, data = training(splits))
+
+model_prophet <- prophet_reg() %>%
+    set_engine("prophet") %>%
+    fit(value ~ date, data = training(splits))
+
+model_lm <- linear_reg() %>%
+    set_engine("lm") %>%
+    fit(value ~ as.numeric(date) + factor(format(date, "%m")),
+        data = training(splits))
+
+calibration_tbl <- modeltime_table(model_arima, model_prophet, model_lm) %>%
+    modeltime_calibrate(new_data = testing(splits))
+
+# Test set accuracy
+calibration_tbl %>% modeltime_accuracy()
+
+# Refit on all data and forecast 3 years ahead
+calibration_tbl %>%
+    modeltime_refit(data = data) %>%
+    modeltime_forecast(h = "3 years", actual_data = data) %>%
+    plot_modeltime_forecast(.interactive = FALSE)
 ```
 
-## Why modeltime?
+## Many time series
 
-> Modeltime unlocks time series models and machine learning in one
-> framework
+- **Global models:** one model fit across all series (panel data). Calibrate with `modeltime_calibrate(id = ...)` to get accuracy and prediction intervals per series.
+- **Nested models:** separate models per series with `modeltime_nested_fit()`, `modeltime_nested_select_best()` and `modeltime_nested_refit()`.
+- **Parallel processing:** set `allow_par = TRUE` in the control functions after registering a backend with `parallel_start()`.
 
-<img src="vignettes/forecast_plot.jpg" width="100%" style="display: block; margin: auto;" />
+## Documentation
 
-No need to switch back and forth between various frameworks. `modeltime`
-unlocks machine learning & classical time series analysis.
+The articles in [`vignettes/`](vignettes/) cover:
 
-- **forecast**: Use ARIMA, ETS, and more models coming (`arima_reg()`,
-  `arima_boost()`, & `exp_smoothing()`).
-- **prophet**: Use Facebook’s Prophet algorithm (`prophet_reg()` &
-  `prophet_boost()`)
-- **tidymodels**: Use any `parsnip` model: `rand_forest()`,
-  `boost_tree()`, `linear_reg()`, `mars()`, `svm_rbf()` to forecast
+- Getting started
+- Global (panel) models
+- Nested forecasting
+- Recursive forecasting
+- Conformal prediction intervals
+- Hyperparameter tuning and parallel processing
+- Spark backend
+- Extending `modeltime` with new models
 
-## Forecast faster
+## Related packages
 
-> A streamlined workflow for forecasting
+- [timetk](https://business-science.github.io/timetk/): time series data wrangling, feature engineering and plotting
+- [modeltime.ensemble](https://business-science.github.io/modeltime.ensemble/): combine forecasts from several models
+- [modeltime.resample](https://business-science.github.io/modeltime.resample/): backtesting over resamples
 
-Modeltime incorporates a [streamlined workflow (see Getting Started with
-Modeltime)](https://business-science.github.io/modeltime/articles/getting-started-with-modeltime.html)
-for using best practices to forecast.
+## License
 
-<hr>
-
-<div class="figure" style="text-align: center">
-
-<img src="vignettes/modeltime_workflow.jpg" alt="A streamlined workflow for forecasting" width="100%" />
-<p class="caption">
-A streamlined workflow for forecasting
-</p>
-
-</div>
-
-<hr>
-
-## Meet the modeltime ecosystem
-
-> Learn a growing ecosystem of forecasting packages
-
-<div class="figure" style="text-align: center">
-
-<img src="man/figures/modeltime_ecosystem.jpg" alt="The modeltime ecosystem is growing" width="100%" />
-<p class="caption">
-The modeltime ecosystem is growing
-</p>
-
-</div>
-
-Modeltime is part of a **growing ecosystem** of Modeltime forecasting
-packages.
-
-- [Modeltime (Machine
-  Learning)](https://business-science.github.io/modeltime/)
-
-- [Modeltime H2O
-  (AutoML)](https://business-science.github.io/modeltime.h2o/)
-
-- [Modeltime GluonTS (Deep
-  Learning)](https://business-science.github.io/modeltime.gluonts/)
-
-- [Modeltime Ensemble (Blending
-  Forecasts)](https://business-science.github.io/modeltime.ensemble/)
-
-- [Modeltime Resample
-  (Backtesting)](https://business-science.github.io/modeltime.resample/)
-
-- [Timetk (Feature Engineering, Data Wrangling, Time Series
-  Visualization)](https://business-science.github.io/timetk/)
-
-## Summary
-
-Modeltime is an amazing ecosystem for time series forecasting. But it
-can take a long time to learn:
-
-- Many algorithms
-- Ensembling and Resampling
-- Machine Learning
-- Deep Learning
-- Scalable Modeling: 10,000+ time series
-
-Your probably thinking how am I ever going to learn time series
-forecasting. Here’s the solution that will save you years of struggling.
-
-## Take the High-Performance Forecasting Course
-
-> Become the forecasting expert for your organization
-
-<a href="https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/" target="_blank"><img src="https://www.filepicker.io/api/file/bKyqVAi5Qi64sS05QYLk" alt="High-Performance Time Series Forecasting Course" width="100%" style="box-shadow: 0 0 5px 2px rgba(0, 0, 0, .5);"/></a>
-
-[*High-Performance Time Series
-Course*](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/)
-
-### Time Series is Changing
-
-Time series is changing. **Businesses now need 10,000+ time series
-forecasts every day.** This is what I call a *High-Performance Time
-Series Forecasting System (HPTSF)* - Accurate, Robust, and Scalable
-Forecasting.
-
-**High-Performance Forecasting Systems will save companies by improving
-accuracy and scalability.** Imagine what will happen to your career if
-you can provide your organization a “High-Performance Time Series
-Forecasting System” (HPTSF System).
-
-### How to Learn High-Performance Time Series Forecasting
-
-I teach how to build a HPTFS System in my [**High-Performance Time
-Series Forecasting
-Course**](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting).
-You will learn:
-
-- **Time Series Machine Learning** (cutting-edge) with `Modeltime` - 30+
-  Models (Prophet, ARIMA, XGBoost, Random Forest, & many more)
-- **Deep Learning** with `GluonTS` (Competition Winners)
-- **Time Series Preprocessing**, Noise Reduction, & Anomaly Detection
-- **Feature engineering** using lagged variables & external regressors
-- **Hyperparameter Tuning**
-- **Time series cross-validation**
-- **Ensembling** Multiple Machine Learning & Univariate Modeling
-  Techniques (Competition Winner)
-- **Scalable Forecasting** - Forecast 1000+ time series in parallel
-- and more.
-
-<p class="text-center" style="font-size:24px;">
-Become the Time Series Expert for your organization.
-</p>
-<br>
-<p class="text-center" style="font-size:30px;">
-<a href="https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting">Take
-the High-Performance Time Series Forecasting Course</a>
-</p>
+MIT. Originally written by Matt Dancho, copyright Business Science. See [LICENSE.md](LICENSE.md).

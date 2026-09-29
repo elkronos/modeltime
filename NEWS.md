@@ -20,6 +20,7 @@
 - `arima_boost()` and `prophet_boost()` print the xgboost model call on all xgboost versions.
 - `predict()` for recursive models now passes `type` and `opts` through instead of dropping them.
 - ARIMA and ETS predict read the point forecast directly instead of converting the full forecast object to a tibble.
+- Rewrote the README without images, and removed course promotion, video links and analytics tracking from the README, articles and pkgdown site. Package URLs now point to this repository.
 
 # modeltime 1.3.4
 

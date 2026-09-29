@@ -24,9 +24,9 @@ knitr::opts_chunk$set(
 
 > Iteratively forecast with nested modeling
 
-__Why is nested forecasting important?__ For starters, the ability to _iteratively forecast_ time series with many models that are trained on many individual groups has been a huge request from students in our [Time Series Course](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/). Why? Because two methods exist that get results: 
+__Why is nested forecasting important?__ For starters, the ability to _iteratively forecast_ time series with many models that are trained on many individual groups is a common need. Two methods exist that get results: 
 
-1. __Global Modeling:__ Best for scalability using a Global Models and a Panel Data structure. See [Forecasting with Global Models](https://business-science.github.io/modeltime/articles/modeling-panel-data.html). 
+1. __Global Modeling:__ Best for scalability using a Global Models and a Panel Data structure. See [Forecasting with Global Models](modeling-panel-data.html). 
 
 2. __Iterative Forecasting:__ Best for accuracy using a Nested Data Structure. Takes longer than global model (more resources due to for-loop iteration), but can yield great results. 
 
@@ -356,43 +356,4 @@ nested_modeltime_refit_tbl %>%
 
 ## Summary
 
-We've now successfully completed a __Nested Forecast.__ You may find this challenging, especially if you are not familiar with the Modeltime Workflow, terminology, or tidymodeling in R. If this is the case, we have a solution. Take our high-performance forecasting course. 
-
-
-## Take the High-Performance Forecasting Course
-
-> Become the forecasting expert for your organization
-
-<a href="https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/" target="_blank"><img src="https://www.filepicker.io/api/file/bKyqVAi5Qi64sS05QYLk" alt="High-Performance Time Series Forecasting Course" width="100%" style="box-shadow: 0 0 5px 2px rgba(0, 0, 0, .5);"/></a>
-
-[_High-Performance Time Series Course_](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting/)
-
-### Time Series is Changing
-
-Time series is changing. __Businesses now need 10,000+ time series forecasts every day.__ This is what I call a _High-Performance Time Series Forecasting System (HPTSF)_ - Accurate, Robust, and Scalable Forecasting. 
-
- __High-Performance Forecasting Systems will save companies by improving accuracy and scalability.__ Imagine what will happen to your career if you can provide your organization a "High-Performance Time Series Forecasting System" (HPTSF System).
-
-### How to Learn High-Performance Time Series Forecasting
-
-I teach how to build a HPTFS System in my [__High-Performance Time Series Forecasting Course__](https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting). You will learn:
-
-- __Time Series Machine Learning__ (cutting-edge) with `Modeltime` - 30+ Models (Prophet, ARIMA, XGBoost, Random Forest, & many more)
-- __Deep Learning__ with `GluonTS` (Competition Winners)
-- __Time Series Preprocessing__, Noise Reduction, & Anomaly Detection
-- __Feature engineering__ using lagged variables & external regressors
-- __Hyperparameter Tuning__
-- __Time series cross-validation__
-- __Ensembling__ Multiple Machine Learning & Univariate Modeling Techniques (Competition Winner)
-- __Scalable Forecasting__ - Forecast 1000+ time series in parallel
-- and more.
-
-<p class="text-center" style="font-size:24px;">
-Become the Time Series Expert for your organization.
-</p>
-<br>
-<p class="text-center" style="font-size:30px;">
-<a href="https://university.business-science.io/p/ds4b-203-r-high-performance-time-series-forecasting">Take the High-Performance Time Series Forecasting Course</a>
-</p>
-
-
+This article completed a nested forecast: fitting several models for each time series, selecting the best model per series, and refitting it to forecast the future.
