@@ -33,7 +33,7 @@ knitr::include_graphics("panel_data_success.jpg")
 ```
 
 <br>
-<img src="logo-modeltime.png" width="147" height="170" align="right" />
+<img src="logo-modeltime.png" alt="modeltime logo" width="147" height="170" align="right" />
 
 __Why is global modeling important for time series?__ For starters, the ability to forecast many time series with a single model that is trained on many time series groups was a winning strategy in recent Kaggle M5 Forecasting Competition. It also speeds up forecasting, allowing the data scientist to more rapidly experiment and find good solutions. 
 

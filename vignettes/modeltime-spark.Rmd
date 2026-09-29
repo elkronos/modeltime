@@ -56,9 +56,19 @@ library(dplyr)
 
 Next, we set up a Spark connection via `sparklyr`. For this tutorial, we use the "local" connection. But many users will use [Databricks](https://databricks.com/) to scale the forecasting workload. 
 
-Ro run Spark locally:
+To run Spark locally:
 
-```{r, message=TRUE, warning=TRUE}
+```{r, include = FALSE}
+# Run the Spark chunks only when a local Spark connection can be made.
+# Otherwise the code is shown without being run, so the article still builds.
+sc <- tryCatch(
+  spark_connect(master = "local"),
+  error = function(e) NULL
+)
+knitr::opts_chunk$set(eval = !is.null(sc))
+```
+
+```{r, eval = FALSE}
 sc <- spark_connect(master = "local")
 ```
 

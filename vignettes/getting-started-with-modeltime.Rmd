@@ -32,7 +32,7 @@ knitr::opts_chunk$set(
 knitr::include_graphics("forecast_plot.jpg")
 ```
 <br>
-<img src="logo-modeltime.png" width="147" height="170" align="right" />
+<img src="logo-modeltime.png" alt="modeltime logo" width="147" height="170" align="right" />
 
 Forecasting with `tidymodels` made easy! This short tutorial shows how you can use:
 
