@@ -238,10 +238,14 @@ modeltime_refit_parallel <- function(object, data, ..., control) {
     # Capture dots so they can be exported to workers (`...` can't be used in foreach body)
     dots <- list(...)
 
-    # Iterate over the models directly so only each model (not the whole
-    # modeltime table) is shipped to the workers
+    # Ship only the models (not the whole modeltime table with its
+    # calibration data) to the workers. Iterate over indices: iterating over
+    # the model objects makes doFuture scan them for globals, which fails on
+    # purrr lambdas stored inside fitted workflows.
+    models <- ret$.model
+
     mod_list <- foreach::foreach(
-            model               = ret$.model,
+            i                   = seq_along(models),
             .inorder            = TRUE,
             .packages           = control$packages,
             .options.future     = list(seed = TRUE),
@@ -250,7 +254,7 @@ modeltime_refit_parallel <- function(object, data, ..., control) {
 
             mod <- do.call(
                 safe_modeltime_refit,
-                c(list(model, new_data, control = control), dots)
+                c(list(models[[i]], new_data, control = control), dots)
             )
 
             res <- mod %>%
